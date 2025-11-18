@@ -1,0 +1,537 @@
+<?= $this->extend('layout/main') ?>
+<?= $this->section('title') ?>
+Ticket´s
+<?= $this->endSection() ?>
+
+<?= $this->section('css') ?>
+<link rel="stylesheet" href="<?= base_url() ?>/public/css/requisiciones/generar/style.css">
+<link rel="stylesheet" href="<?= base_url() ?>/public/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+<link rel="stylesheet" href="<?= base_url() ?>/public/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<style>
+    .switch {
+        position: absolute;
+        top: 50%;
+        width: 100px;
+        height: 30px;
+        text-align: center;
+        margin: -20px 0 0 0;
+        background: #00bc9c;
+        transition: all 0.2s ease;
+        border-radius: 25px;
+    }
+
+    .switch span {
+        position: absolute;
+        width: 20px;
+        height: 4px;
+        top: 50%;
+        left: 45%;
+        margin: -2px 0px 0px -4px;
+        background: #fff;
+        display: block;
+        transform: rotate(-45deg);
+        transition: all 0.2s ease;
+    }
+
+    .switch span:after {
+        content: "";
+        display: block;
+        position: absolute;
+        width: 4px;
+        height: 12px;
+        /* left: 50%; */
+        margin-top: -8px;
+        background: #fff;
+        transition: all 0.2s ease;
+    }
+
+    input[type=radio] {
+        display: none;
+    }
+
+    .switch label {
+        cursor: pointer;
+        color: rgba(0, 0, 0, 0.4);
+        width: 60px;
+        line-height: 50px;
+        transition: all 0.2s ease;
+    }
+
+    .lbl-yes {
+        position: absolute;
+        left: -8px;
+        top: -10px;
+        height: 20px;
+    }
+
+    .lbl-no {
+        position: absolute;
+        top: -10px;
+        right: -6px;
+
+    }
+
+    .no:checked~.switch {
+        background: #eb4f37;
+    }
+
+    .no:checked~.switch span:after {
+        background: #fff;
+        height: 20px;
+        margin-top: -8px;
+        margin-left: 8px;
+    }
+
+    .sl-modal {
+        width: 30%;
+        top: 35%;
+        right: 35%;
+        left: 35%;
+    }
+
+    .scrold {
+        width: 25rem;
+        height: 535px;
+        overflow: hidden;
+        overflow-y: scroll;
+        border: 1px solid rgba(168, 168, 168, 0.4);
+        border-top: none;
+        background-color: white;
+    }
+    /**
+    *CSS PARA BOTON DE ENCUESTA
+     */
+
+     .btn-calif {
+        font-size: 75px;
+    }
+
+    .p-calif {
+        font-size: 20px;
+        margin-bottom: 0;
+        margin-top: 4px;
+    }
+    /**TERNIMO CSS ENCUESTA */
+
+    @media screen and (min-width: 1900px) {
+        .scrold {
+            width: 25rem;
+            height: 52rem;
+            overflow: hidden;
+            overflow-y: scroll;
+            border: 1px solid rgba(168, 168, 168, 0.4);
+            border-top: none;
+            background-color: white;
+        }
+    }
+
+    .scrold::-webkit-scrollbar {
+        width: 8px;
+        /* height: 8px; */
+    }
+
+    .scrold::-webkit-scrollbar-track {
+        background: rgba(241, 241, 241, .12);
+    }
+
+    .scrold::-webkit-scrollbar-thumb {
+        background-color: rgba(168, 168, 168, 0.3);
+        border-radius: 20px;
+        /* border: 3px solid #474D54; */
+    }
+
+    .card-style-personal {
+        border-radius: .25rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 1px 2px rgba(0, 0, 0, .24);
+        padding: inherit;
+        margin-bottom: 15px;
+
+    }
+
+    .nav-icon {
+        margin-left: 0.05rem;
+        margin-right: 0.2rem;
+        text-align: center;
+    }
+
+    .card-html {
+        /* flex: 1 0 0%; */
+        margin-right: 7.5px;
+        margin-bottom: 0;
+        margin-left: 7.5px;
+    }
+
+    .box-cards {
+        height: 100%;
+        overflow: hidden;
+        overflow-x: scroll;
+        display: flex;
+        padding-bottom: 10px;
+    }
+
+    .box-cards::-webkit-scrollbar {
+        /* width: 8px; */
+        height: 8px;
+    }
+
+    .box-cards::-webkit-scrollbar-track {
+        background: rgba(241, 241, 241, .12);
+    }
+
+    .box-cards::-webkit-scrollbar-thumb {
+        background-color: rgba(0.75, 0.75, 0.75, 0.4);
+        border-radius: 20px;
+        /* border: 3px solid #474D54; */
+    }
+</style>
+<?= $this->endSection() ?>
+<?= $this->section('content') ?>
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <section class="content-header ">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <h1 style="margin-bottom:1rem;">Tickets Servicios Generales</h1>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <?php if (session()->access_tickets == 4) { ?>
+                <section class="content-header bg-white" id="div-filtros" style="margin-top: -1rem;">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <label for="sel-filtro-prioridad">Prioridad:</label>
+                                <select class="form-control" id="sel-filtro-prioridad" onchange="BuscarTickets();">
+                                    <option value="">TODAS</option>
+                                    <option value="2">BAJA</option>
+                                    <option value="3">MEDIA</option>
+                                    <option value="4">ALTA</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <label for="sel-filtro-actividad">Actividad:</label>
+                                <select id="sel-filtro-actividad" class="form-control rounded-0 select2bs4 select2-hidden-accessible" style="width: 100%; height: calc(2.25rem + 2px);" onchange="BuscarTickets();">
+                                    <option value="">TODAS</option>
+                                    <?php foreach ($actvidad as $key) { ?>
+                                        <option value="<?= $key->ActividadId; ?>"><?= $key->Actividad_Actividad; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <label for="sel-filtro-usuario">Creado por:</label>
+                                <select class="form-control " style="width: 100%; height: calc(2.25rem + 2px);" id="sel-filtro-usuario" onchange="BuscarTickets();">
+                                    <option value="">TODOS</option>
+                                    <?php foreach ($usuarios as $key) { ?>
+                                        <option value="<?= $key->id_user; ?>"><?= $key->nombre; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <label for="sel-filtro-tecnico">Atendido por:</label>
+                                <select class="form-control select2bs4 select2-hidden-accessible" style="width: 100%; height: calc(2.25rem + 2px);" id="sel-filtro-tecnico" onchange="BuscarTickets();">
+                                    <option value="">TODOS</option>
+                                    <?php foreach ($inge as $key) { ?>
+                                        <option value="<?= $key->TecnicoId; ?>"><?= $key->nombre; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <input type="hidden" id="fecha_inicio">
+                                <input type="hidden" id="Fecha_fin">
+                                <label for="date_range">Fecha:</label>
+                                <input type="text" id="date_range" class="form-control">
+                            </div>
+                            <div class="col-lg-2">
+                                <label for="txt-buscar">Folio:</label>
+                                <input type="search" id="txt-buscar" class="form-control" placeholder="Buscar ...">
+                                <div class="text-danger" id="error_txt-buscar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            <?php } ?>
+        </div>
+    </div>
+    <section class="content">
+        <div id="div_tablero">
+            <div class="box-cards">
+                <div class="card-html card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            Nuevo(s)
+                        </h3>
+                        <div class="card-tools">
+                            <span class="badge bg-secondary float-right" id="div-ntbl"></span>
+                        </div>
+                    </div>
+                    <div class="card-body scrold">
+                        <div class="form-group row">
+                            <button type="button" id="btn-agregar" onclick="Agregar();" class="btn btn-block btn-outline-danger"><i class="fas fa-plus"></i> Agregar Ticket</button>
+                        </div>
+                        <div id="todo"></div>
+                    </div>
+                </div>
+                <div class="card-html">
+                    <div class="card-header" style="background-color: #F39C12;border-color: #F39C12;color:white;">
+                        <h3 class="card-title">
+                            En proceso
+                        </h3>
+                        <div class="card-tools">
+                            <span class="badge float-right" style="background-color: #F39C12;border-color: #F39C12;color:white;" id="div-eptbl"></span>
+                        </div>
+                    </div>
+                    <div class="card-body scrold" id="inprogress">
+                    </div>
+                </div>
+                <div class="card-html card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            Concluido (s)
+                        </h3>
+                        <div class="card-tools">
+                            <span class="badge bg-info float-right" id="div-ctbl"></span>
+                        </div>
+                    </div>
+                    <div class="card-body scrold" id="completed">
+                    </div>
+                </div>
+                <div class="card-html card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            Cerrado (s)
+                        </h3>
+                        <div class="card-tools">
+                            <span class="badge bg-success float-right" id="div-cltbl"></span>
+                        </div>
+                    </div>
+                    <div class="card-body scrold" id="closed">
+                    </div>
+                </div>
+                <div class="card-html card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            Cancelado (s)
+                        </h3>
+                        <div class="card-tools">
+                            <span class="badge bg-danger float-right" id="div-catbl"></span>
+                        </div>
+                    </div>
+                    <div class="card-body scrold" id="cancelled">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<section>
+    <div class="modal fade" id="nuevoTicketModal" role="dialog" aria-labelledby="nuevoTicketModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-ticket-alt nav-icon"></i>&nbsp;&nbsp;&nbsp;Nuevo Ticket</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="form_nuevo_ticket" method="post">
+                    <div class="modal-body">
+                        <div class="form-row">
+                            <div class="col-sm-5">
+                                <!-- <label style="font-family: 'Roboto Condensed';font-size:15px;">Actividad:</label> -->
+                                <!-- <select class="form-control" id="sel-actividad" name="sel-actividad" data-toggle="validation" data-required="true" data-message="Actividad." style="width: 100%;" required>
+                                </select> -->
+                            </div>
+                            <div class="col-sm-12" style="margin-top: 10px;">
+                                <label style="font-family: 'Roboto Condensed';font-size:15px;">Describe la Actividad:</label>
+                                <textarea class="form-control" id="txt-descripcion" name="txt-descripcion" rows="4" maxlength="500" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                        <button type="submit" id="btn_nuevo_ticket" name="editar_permiso" class="btn btn-guardar">Generar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="modal fade" id="detalleTicketModal" tabindex="-1" role="dialog" aria-labelledby="detalleTicketModalLabel" aria-hidden="true" data-backdrop='static' data-keyboard="false">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-ticket-alt nav-icon"></i>&nbsp;&nbsp;&nbsp;Detalles de Ticket</h5>
+                    <button type="button" class="close" id="btn_cerrar_header" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-7">
+                                <div class="form-group row"> <i class="fas fa-align-left fa-2x" style="color:#999999;padding-right: 10px;"></i><label style="font-size: 17px;">Descripción</label> </div>
+                                <div class="form-group row"> <textarea class="form-control" style="height:7rem;" id="txt-ddescripcion" rows="6" maxlength="450" readonly></textarea> </div>
+                                <div id="div-txtsolucion" style="display:none;">
+                                    <div class="form-group row"> <i class="fas fa-tasks fa-2x" style="color:#999999;padding-right: 10px;"></i><label style="font-size: 17px;">Solución</label> </div>
+                                    <div class="form-group row"> <textarea class="form-control" style="height:7rem;" id="txt-solucion_detalle" rows="5" maxlength="450" readonly></textarea> </div>
+                                </div>
+                                <div id="div-txtcancel" style="display:none;">
+                                    <div class="form-group row"> <i class="fas fa-tasks fa-2x" style="color:#999999;padding-right: 10px;"></i><label style="font-size: 17px;">Motivo Cancelación</label> </div>
+                                    <div class="form-group row"> <textarea class="form-control" style="height:7rem;" id="txt-cancel_motivo" rows="5" maxlength="450" readonly></textarea> </div>
+                                </div>
+                                
+                                <!-- <div class="form-group row"> <i class="fas fa-list fa-2x" style="color:#999999;padding-right: 10px;"></i><label style="font-size: 17px;">Chat</label> </div> -->
+                                <form id="form_nuevo_comentario" method="post">
+                                    <input type="hidden" name="id_Request" id="id_Request">
+                                    <div id="div_nueva_accion"></div>
+                                </form>
+                                <div class="form-group row">
+                                    <div class="timeline w-100" id="div-acciones"></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-4">
+                                <div class="form-group row"> <i class="fas fa-tag fa-lg" style="color:#999999;padding-right: 10px;"></i><label style="font-size: 17px;">Etiquetas</label> </div>
+                                <div class="form-group row">
+                                    <ul class="nav nav-pills flex-column" style="padding: 0">
+                                        <li><a href="#" class="nav-link" style="font-size: 13px;"><i class="fa fa-circle" style="color:black;"></i> Folio: <b style="margin-left:39px;" id="lbl-folio"></b></a></li>
+                                        <li><a href="#" class="nav-link" style="font-size: 13px;"><i class="fa fa-circle" style="color:#2980B9;"></i> Fecha: <b style="margin-left: 34px;" id="lbl-clasificacion"></b></a></li>
+                                        <li><a href="#" class="nav-link" style="font-size: 13px;"><i class="fa fa-circle" style="color:#2980B9;"></i> Hora: <b style="margin-left: 40px;" id="lbl-hora"></b></a></li>
+                                        <li><a href="#" class="nav-link" style="font-size: 13px;"><i class="fa fa-circle" style="color:#DA1F1C;"></i> Prioridad: <b style="margin-left:18px;" id="lbl-prioridad"></b></a></li>
+                                        <li><a href="#" class="nav-link" style="font-size: 13px;"><i class="fa fa-circle" style="color:#999999;"></i> Usuario: <b style="margin-left:27px;" id="lbl-usuario"></b></a></li>
+                                        <li><a href="#" class="nav-link" style="font-size: 13px;"><i class="fa fa-circle" style="color:#DE37A1;"></i> Ingeniero: <b style="margin-left:20px;" id="lbl-tecnico"></b></a></li>
+                                    </ul>
+                                </div>
+                                <div class="form-group row"> <i class="fas fa-list fa-lg" style="color:#999999;padding-right: 10px;"></i><label style="font-size: 17px;">Acciones</label> </div>
+                                <div class="form-group row">
+                                    <ul class="nav nav-pills flex-column">
+                                        <?php if (/* session()->access_tickets == 1 || */ session()->id_user == 1063) { ?>
+                                            <!-- <li class="nav-item active"> <a href="#" class="nav-link" onclick="Reassign()" style="font-size: 13px;" id="hrf-reasign"> <i class="fas fa-undo-alt nav-icon"></i> Reasignar </a> </li> -->
+                                            <li class="nav-item active"> <button style="border:none;width: 162px;" class="btn btn-outline-secondary" onclick="Comment(1)" id="hrf-comment"> <i class="far fa-comment-dots nav-icon"></i> Comentario <span class="badge bg-secondary float-right p-2" id="div-tblcomment" style="font-size: 10px;margin-left:23px;margin-top: 1px;"></span></button></li>
+                                            <li class="nav-item active"> <button style="border:none;width: 162px;" class="btn btn-outline-secondary" onclick="Comment(2)" id="hrf-file"> <i class="far fa-file-alt nav-icon"></i> Archivo <span class="badge bg-secondary float-right p-2" id="div-tblfile" style="font-size: 10px;margin-left:45px;margin-top: 1px;"></span></button></li>
+                                        <?php } ?>
+                                        <!-- <li class="nav-item active"> <button style="border:none;" class="btn btn-outline-dark" onclick="requestSparePart()" id="btn-request-spare-part-admin"> <i class="fas fa-toolbox nav-icon"></i>Solicitud de Refacción </button> </li> -->
+                                        <li class="nav-item active"> <button style="border:none;" class="btn btn-outline-warning" onclick="changeStatusForAdmin(2)" id="btn-proces-admin"> <i class="fas fa-play-circle nav-icon"></i>Iniciar Proceso </button> </li>
+                                        <li class="nav-item active"> <button style="border:none;" class="btn btn-outline-info" onclick="changeStatusForAdmin(3)" id="btn-conclud-admin"> <i class="fas fa-stop-circle nav-icon"></i>Concluir Proceso</button> </li>
+                                        <li class="nav-item active"> <button style="border:none;" class="btn btn-outline-success" onclick="changeStatusForUser(4)" id="btn-clossed-users"> <i class="fas fa-user-check nav-icon"></i>Aceptar </button> </li>
+                                        <li class="nav-item active"> <button style="border:none;" class="btn btn-outline-danger" onclick="changeStatusForUser(0)" id="btn-cancel-users"> <i class="fas fa-check-circle nav-icon"></i>Cancelar </button> </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="tecnico_id">
+                        <input type="hidden" id="estatus_id">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="btn_cerrar" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="modal fade sl-modal" id="reasignarTicketModal" tabindex="-1" role="dialog" aria-labelledby="reasignarTicketModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-undo-alt"></i> Reasignar</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="form_reasignar" method="post">
+                    <div class="modal-body">
+                        <div class="row">
+                            <input type="hidden" name="tecnico_id_ant" id="tecnico_id_ant">
+                            <input type="hidden" name="id_request_reasignar" id="id_request_reasignar">
+                            <label style="font-family: 'Roboto Condensed';font-size:15px;">Ingeniero:</label>
+                            <select class="form-control" id="reasig-tecnico" name="reasig-tecnico" style="width: 100%;"></select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                        <button type="submit" id="btn_reasignar" name="editar_permiso" class="btn btn-guardar">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="modal fade sl-modal" id="cancelarTicketModal" tabindex="-1" role="dialog" aria-labelledby="cancelarTicketModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-circle" style="margin-right: 1rem;"></i>Cancelar Ticket</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="form_cancelar" method="post">
+                    <div class="modal-body">
+                        <div class="row">
+                            <label style="font-family: 'Roboto Condensed';font-size:15px;">Motivo:</label>
+                            <textarea class="form-control" id="txt-solucion-agestatus" rows="2" maxlength="450" data-toggle="validation" data-required="true" data-message="Solucion." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                        <button type="submit" id="btn_cancelar" class="btn btn-guardar">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="modal fade sl-modal" id="concluirTicketModal" tabindex="-1" role="dialog" aria-labelledby="concluirTicketModalLabel" aria-hidden="false">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="form_concluir" method="post">
+                    <div class="modal-body" style="padding: 3rem 1rem 4rem 1rem;text-align:center;">
+                        <div class="row" style="margin-bottom: 20px;">
+                            <div class="col-lg-12">
+                                <h2><i class="far fa-star-half nav-icon"></i> Solución:</h2>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom: 10px;">
+                            <div class="col-lg-12">
+                                <textarea id="solucion_swl" cols="50" rows="6" class="from-control" placeholder="Escribe la solucion" required></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12" style="text-align:center;">
+                                <button id="btn_concluir" type="submit" class="btn btn-info">Concluir</button>
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<?= $this->endSection() ?>
+<?= $this->section('js') ?>
+<script src="<?= base_url() ?>/public/plugins/md5/jquery.md5.min.js"></script>
+<script src="<?= base_url() ?>/public/plugins/select2/js/select2.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://unpkg.com/chart.js-plugin-labels-dv/dist/chartjs-plugin-labels.min.js"></script>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="<?php echo base_url(); ?>/public/js/tickets/administrar-servicios-tablero_v2.js"></script>
+<?= $this->endSection() ?>
